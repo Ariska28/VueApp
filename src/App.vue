@@ -7,23 +7,26 @@
   <router-view/>
 </template>
 
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+<script>
+import { provide, ref } from 'vue'
+
+export default {
+  setup () {
+    provide(/* key */ 'message', /* value */ 'hello!')
+  }
 }
+</script>
+
+<style lang="scss">
 
 nav {
   padding: 30px;
-  background-color: #8699AD;
+  background-color: var(--nav-bg-color);
   border-radius: 20px;
 
   a {
     font-weight: bold;
-    color: #2c3e50;
+    color: var(--text-color);
     text-decoration: none;
 
     &.router-link-exact-active {
