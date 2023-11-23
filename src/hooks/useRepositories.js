@@ -1,9 +1,11 @@
-import { onMounted, ref } from 'vue'
+import { onMounted, watchEffect, ref } from 'vue'
 import * as repositories from '../services/repositories'
 
 export function useRepositories (language = 'javascript', perPage, page) {
   const repositoriesList = ref([])
   const loading = ref(false)
+  const totalItems = ref(0)
+  const totalPages = ref(0)
 
   const fetchReposts = async () => {
     loading.value = true
@@ -24,13 +26,17 @@ export function useRepositories (language = 'javascript', perPage, page) {
       })
     })
 
+    totalItems.value = result.total_count
+    totalPages.value = Math.ceil(totalItems.value / perPage)
     loading.value = false
   }
 
-  onMounted(fetchReposts)
+  watchEffect(fetchReposts)
 
   return {
     repositoriesList,
+    totalItems,
+    totalPages,
     loading
   }
 }
@@ -43,7 +49,13 @@ export function useRepository (owner, repo) {
 
     repository.value = {
       id: result.id,
-      title: result.name
+      name: result.name,
+      description: result.description,
+      owner: result.owner.login,
+      homepage_url: result.homepage,
+      visibility: result.visibility,
+      forks_count: result.forks_count,
+      language: result.language
     }
   }
 
