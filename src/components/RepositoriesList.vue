@@ -5,7 +5,7 @@
     </h2>
 
     <ul class="git-list"
-        v-if="repositories.length > 0"
+        v-if="repositories?.length > 0"
     >
       <RepositoriesItem v-for="repository in repositories"
                         :repository="repository"

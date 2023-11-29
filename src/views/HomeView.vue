@@ -3,24 +3,26 @@ import RepositoriesList from '../components/RepositoriesList'
 import PaginationPages from '../components/PaginationPages'
 import { ref, watchEffect, computed } from 'vue'
 import * as repositories from '../services/repositories'
+import _ from 'lodash'
 
 const repositoriesList = ref([])
 const loading = ref(false)
 const totalItems = ref(0)
 const totalPages = ref(0)
-const currentPage = ref(1)
+const currentPage = ref(0)
 const perPage = 10
 const searchingQuery = ref('')
 
+const TOTAL_COUNT = 100
+
 function updateCurrentPage (someData) {
-  currentPage.value = someData
-  repositoriesList.value = []
+  currentPage.value = someData - 1
 }
 
 const fetchReposts = async () => {
   loading.value = true
 
-  const result = await repositories.getRepositoriesWithParams('javascript', perPage, currentPage.value)
+  const result = await repositories.getRepositoriesWithParams('javascript', TOTAL_COUNT)
 
   result.items.forEach((item) => {
     repositoriesList.value.push({
@@ -36,13 +38,14 @@ const fetchReposts = async () => {
     })
   })
 
-  totalItems.value = result.total_count
-  totalPages.value = Math.ceil(totalItems.value / perPage)
   loading.value = false
 }
+totalItems.value = TOTAL_COUNT
+totalPages.value = Math.ceil(totalItems.value / perPage)
 
 const searchingList = computed(() => {
-  return repositoriesList.value.filter((item) => item.title.includes(searchingQuery.value))
+  const smth = repositoriesList.value.filter((item) => item.title.includes(searchingQuery.value))
+  return { arr: _.chunk(smth, 10), length: smth.length }
 })
 
 watchEffect(fetchReposts)
@@ -54,7 +57,7 @@ watchEffect(fetchReposts)
               v-model="searchingQuery"
     />
     <RepositoriesList v-if="!loading"
-                      :repositories="searchingList"
+                      :repositories="searchingList.arr[currentPage]"
     />
 
     <span v-else
@@ -62,7 +65,7 @@ watchEffect(fetchReposts)
     >
     </span>
 
-    <PaginationPages :totalPages="totalPages"
+    <PaginationPages :totalPages="Math.ceil(searchingList.length/perPage)"
                      @getCurrentPage="updateCurrentPage"
     />
   </div>

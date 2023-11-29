@@ -3,11 +3,12 @@
   >
    <button class="pagination-arrows"
            @click="goBackPagination()"
+           v-if="this.limit > 6"
     >
       &#8592;
     </button>
 
-    <button  v-for="item in array"
+    <button  v-for="item in createArray(start, totalPages < limit ? totalPages + 1 : limit + 1)"
              :key="item"
              class="pagination-btn"
              :class="{'is-active': currentPage === item}"
@@ -18,6 +19,7 @@
 
     <button class="pagination-arrows"
             @click="goAheadPagination()"
+            v-if="this.limit < this.totalPages"
     >
       &#8594;
     </button>
@@ -35,8 +37,8 @@ export default {
     return {
       currentPage: 1,
       start: 1,
-      limit: 11,
-      array: this.createArray(1, 11)
+      limit: 6,
+      array: this.createArray(1, 6)
     }
   },
   methods: {
@@ -46,21 +48,17 @@ export default {
     },
 
     goAheadPagination () {
-      if (this.limit < this.totalPages) {
-        this.start = this.start + 10
-        this.limit = this.limit + 10
+      this.start = this.start + 5
+      this.limit = this.limit + 5
 
-        this.array = this.createArray(this.start, this.limit)
-      }
+      this.array = this.createArray(this.start, this.limit)
     },
 
     goBackPagination () {
-      if (this.limit > 11) {
-        this.start = this.start - 10
-        this.limit = this.limit - 10
+      this.start = this.start - 5
+      this.limit = this.limit - 5
 
-        this.array = this.createArray(this.start, this.limit)
-      }
+      this.array = this.createArray(this.start, this.limit)
     },
 
     createArray (start, end) {
