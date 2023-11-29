@@ -1,7 +1,6 @@
 <script setup>
 import RepositoriesList from '../components/RepositoriesList'
 import PaginationPages from '../components/PaginationPages'
-import { useRepositories } from '../hooks/useRepositories.js'
 import { ref, watchEffect, computed } from 'vue'
 import * as repositories from '../services/repositories'
 
@@ -10,7 +9,8 @@ const loading = ref(false)
 const totalItems = ref(0)
 const totalPages = ref(0)
 const currentPage = ref(1)
-const perPage = 2
+const perPage = 10
+const searchingQuery = ref('')
 
 function updateCurrentPage (someData) {
   currentPage.value = someData
@@ -41,13 +41,20 @@ const fetchReposts = async () => {
   loading.value = false
 }
 
+const searchingList = computed(() => {
+  return repositoriesList.value.filter((item) => item.title.includes(searchingQuery.value))
+})
+
 watchEffect(fetchReposts)
 </script>
 
 <template>
   <div class="home">
+    <my-input placeholder="Searching"
+              v-model="searchingQuery"
+    />
     <RepositoriesList v-if="!loading"
-                      :repositories="repositoriesList"
+                      :repositories="searchingList"
     />
 
     <span v-else
@@ -71,24 +78,4 @@ watchEffect(fetchReposts)
     justify-content: space-between;
   }
 
-  .loader {
-    width: 48px;
-    height: 48px;
-    border: 5px solid var(--main-bg-color);
-    border-bottom-color: var(--accent-color);
-    border-radius: 50%;
-    display: inline-block;
-    box-sizing: border-box;
-    animation: rotation 1s linear infinite;
-    margin: auto;
-  }
-
-  @keyframes rotation {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
 </style>

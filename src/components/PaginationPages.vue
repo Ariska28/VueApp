@@ -1,13 +1,25 @@
 <template>
   <div class="pagination"
   >
-    <button  v-for="item in 10"
+   <button class="pagination-arrows"
+           @click="goBackPagination()"
+    >
+      &#8592;
+    </button>
+
+    <button  v-for="item in array"
              :key="item"
              class="pagination-btn"
-             :class="{'is-active': page === item}"
+             :class="{'is-active': currentPage === item}"
              @click="getCurrentPage(item)"
     >
       {{ item }}
+    </button>
+
+    <button class="pagination-arrows"
+            @click="goAheadPagination()"
+    >
+      &#8594;
     </button>
   </div>
 </template>
@@ -21,13 +33,41 @@ export default {
   },
   data () {
     return {
-      page: 1
+      currentPage: 1,
+      start: 1,
+      limit: 11,
+      array: this.createArray(1, 11)
     }
   },
   methods: {
     getCurrentPage (page) {
-      this.page = page
+      this.currentPage = page
       this.$emit('getCurrentPage', page)
+    },
+
+    goAheadPagination () {
+      if (this.limit < this.totalPages) {
+        this.start = this.start + 10
+        this.limit = this.limit + 10
+
+        this.array = this.createArray(this.start, this.limit)
+      }
+    },
+
+    goBackPagination () {
+      if (this.limit > 11) {
+        this.start = this.start - 10
+        this.limit = this.limit - 10
+
+        this.array = this.createArray(this.start, this.limit)
+      }
+    },
+
+    createArray (start, end) {
+      return Array.from(
+        { length: end - start },
+        (_, i) => start + i
+      )
     }
   }
 }
@@ -58,6 +98,11 @@ export default {
       border: 1px solid var(--accent-color);
       color: var(--accent-color);
     }
+  }
+
+  .pagination-arrows {
+    background-color: transparent;
+    border: none;
   }
 
 </style>

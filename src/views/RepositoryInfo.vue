@@ -1,64 +1,79 @@
+<script setup>
+import { useRoute } from 'vue-router'
+import { ref, watchEffect } from 'vue'
+import * as repositories from '../services/repositories'
+
+const route = useRoute()
+const loading = ref(false)
+const repository = ref([])
+
+const fetchRepo = async () => {
+  loading.value = true
+
+  const result = await repositories.getRepository(route.params.owner, route.params.repo)
+
+  repository.value = {
+    id: result.id,
+    name: result.name,
+    description: result.description,
+    owner: result.owner.login,
+    homepage_url: result.homepage,
+    visibility: result.visibility,
+    forks_count: result.forks_count,
+    language: result.language
+  }
+
+  loading.value = false
+}
+
+watchEffect(fetchRepo)
+
+</script>
+
 <template>
   <div class="info">
-    <h1 class="info-title">
-      {{ repository.name }}
-    </h1>
+    <div class="info-content" v-if="!loading">
+      <h1 class="info-title">
+        {{ repository.name }}
+      </h1>
 
-    <p class="info-text">
-     <strong> Description: </strong> {{ repository.description }}
-    </p>
+      <p class="info-text">
+      <strong> Description: </strong> {{ repository.description }}
+      </p>
 
-    <p class="info-text">
-      <strong>Visibility: </strong> {{ repository.visibility }}
-    </p>
+      <p class="info-text">
+        <strong>Visibility: </strong> {{ repository.visibility }}
+      </p>
 
-    <p class="info-text">
-      <strong> Count of forks: </strong> {{ repository.forks_count }}
-    </p>
+      <p class="info-text">
+        <strong> Count of forks: </strong> {{ repository.forks_count }}
+      </p>
 
-    <p class="info-text">
-      <strong> Main language of repository: </strong> {{ repository.language }}
-    </p>
+      <p class="info-text">
+        <strong> Main language of repository: </strong> {{ repository.language }}
+      </p>
 
-    <div class="info-text">
-      <strong> Owner:</strong> {{ repository.owner }}
+      <div class="info-text">
+        <strong> Owner:</strong> {{ repository.owner }}
+      </div>
+
+      <div class="info-text">
+        Do you interest it?
+        <a v-if="repository.homepage_url"
+          :href="repository.homepage_url"
+          target="_blank"
+        >
+          Click here
+        </a>
+      </div>
     </div>
 
-    <div class="info-text">
-      Do you interest it?
-      <a v-if="repository.homepage_url"
-       :href="repository.homepage_url"
-       target="_blank"
+    <span v-else
+        class="loader"
     >
-      Click here
-    </a>
-
-    </div>
+  </span>
   </div>
 </template>
-
-<script>
-import { useRepositories, useRepository } from '../hooks/useRepositories.js'
-import { useRoute } from 'vue-router'
-
-export default {
-  data () {
-    return {
-      owner: this.$route.params.repo
-    }
-  },
-  setup () {
-    const route = useRoute()
-    const { repositoriesList, loading } = useRepositories('javascript')
-    const { repository } = useRepository(route.params.owner, route.params.repo)
-    return {
-      repositoriesList,
-      loading,
-      repository
-    }
-  }
-}
-</script>
 
 <style lang="scss" scoped>
   .info {
@@ -71,6 +86,13 @@ export default {
   .info-title {
     text-align: center;
     text-transform: uppercase;
+  }
+
+  .loader {
+    margin: auto;
+    display: block;
+    border: 5px solid #fff;
+    border-bottom-color: var(--accent-color);
   }
 
   .info-text {
