@@ -7,17 +7,10 @@ import _ from 'lodash'
 
 const repositoriesList = ref([])
 const loading = ref(false)
-const totalItems = ref(0)
-const totalPages = ref(0)
 const currentPage = ref(0)
-const perPage = 10
 const searchingQuery = ref('')
 
 const TOTAL_COUNT = 100
-
-function updateCurrentPage (someData) {
-  currentPage.value = someData - 1
-}
 
 const fetchReposts = async () => {
   loading.value = true
@@ -40,15 +33,17 @@ const fetchReposts = async () => {
 
   loading.value = false
 }
-totalItems.value = TOTAL_COUNT
-totalPages.value = Math.ceil(totalItems.value / perPage)
 
 const searchingList = computed(() => {
-  const smth = repositoriesList.value.filter((item) => item.title.includes(searchingQuery.value))
-  return { arr: _.chunk(smth, 10), length: smth.length }
+  return _.chunk(repositoriesList.value.filter((item) => item.title.includes(searchingQuery.value)), 10)
 })
 
+function updateCurrentPage (someData) {
+  currentPage.value = someData
+}
+
 watchEffect(fetchReposts)
+
 </script>
 
 <template>
@@ -56,8 +51,9 @@ watchEffect(fetchReposts)
     <my-input placeholder="Searching"
               v-model="searchingQuery"
     />
+
     <RepositoriesList v-if="!loading"
-                      :repositories="searchingList.arr[currentPage]"
+                      :repositories="searchingList[currentPage - 1]"
     />
 
     <span v-else
@@ -65,7 +61,7 @@ watchEffect(fetchReposts)
     >
     </span>
 
-    <PaginationPages :totalPages="Math.ceil(searchingList.length/perPage)"
+    <PaginationPages :searchingList="searchingList"
                      @getCurrentPage="updateCurrentPage"
     />
   </div>

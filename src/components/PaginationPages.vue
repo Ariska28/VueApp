@@ -3,12 +3,12 @@
   >
    <button class="pagination-arrows"
            @click="goBackPagination()"
-           v-if="this.limit > 6"
+           v-if="limitPagination > 6"
     >
       &#8592;
     </button>
 
-    <button  v-for="item in createArray(start, totalPages < limit ? totalPages + 1 : limit + 1)"
+    <button  v-for="item in createArray(startPagination, limitPagination > totalPages ? totalPages + 1 : limitPagination)"
              :key="item"
              class="pagination-btn"
              :class="{'is-active': currentPage === item}"
@@ -19,7 +19,7 @@
 
     <button class="pagination-arrows"
             @click="goAheadPagination()"
-            v-if="this.limit < this.totalPages"
+            v-if="limitPagination < totalPages"
     >
       &#8594;
     </button>
@@ -29,16 +29,17 @@
 <script>
 export default {
   props: {
-    totalPages: {
-      type: Number
+    searchingList: {
+      type: Array,
+      required: true
     }
   },
   data () {
     return {
+      totalPages: this.searchingList.length,
       currentPage: 1,
-      start: 1,
-      limit: 6,
-      array: this.createArray(1, 6)
+      startPagination: 1,
+      limitPagination: 6
     }
   },
   methods: {
@@ -48,17 +49,13 @@ export default {
     },
 
     goAheadPagination () {
-      this.start = this.start + 5
-      this.limit = this.limit + 5
-
-      this.array = this.createArray(this.start, this.limit)
+      this.startPagination = this.startPagination + 5
+      this.limitPagination = this.limitPagination + 5
     },
 
     goBackPagination () {
-      this.start = this.start - 5
-      this.limit = this.limit - 5
-
-      this.array = this.createArray(this.start, this.limit)
+      this.startPagination = this.startPagination - 5
+      this.limitPagination = this.limitPagination - 5
     },
 
     createArray (start, end) {
@@ -66,6 +63,12 @@ export default {
         { length: end - start },
         (_, i) => start + i
       )
+    }
+  },
+  watch: {
+    searchingList: function (newVal) {
+      this.totalPages = newVal.length
+      this.getCurrentPage(1)
     }
   }
 }
